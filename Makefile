@@ -1,6 +1,7 @@
 # ============================================================
-#  Makefile - Feature 3 : STATIC library build
-#  Creates lib/libmyutils.a with ar, then links bin/client_static
+#  Makefile - Feature 4 : STATIC + DYNAMIC library build
+#  lib/libmyutils.a   -> bin/client_static
+#  lib/libmyutils.so  -> bin/client_dynamic   (needs -fPIC)
 # ============================================================
 
 CC          = gcc
@@ -15,44 +16,62 @@ LIBDIR      = lib
 
 LIBNAME     = myutils
 STATIC_LIB  = $(LIBDIR)/lib$(LIBNAME).a
-TARGET      = $(BINDIR)/client_static
+SHARED_LIB  = $(LIBDIR)/lib$(LIBNAME).so
+
+TARGET_S    = $(BINDIR)/client_static
+TARGET_D    = $(BINDIR)/client_dynamic
 
 LIBOBJS     = $(OBJDIR)/mystrfunctions.o $(OBJDIR)/myfilefunctions.o
+PICOBJS     = $(OBJDIR)/mystrfunctions.pic.o $(OBJDIR)/myfilefunctions.pic.o
 MAINOBJ     = $(OBJDIR)/main.o
 
-all: $(TARGET)
+all: $(TARGET_S) $(TARGET_D)
 
-# link main.o against our own static library
-$(TARGET): $(STATIC_LIB) $(MAINOBJ)
+# ---------- static ----------
+$(TARGET_S): $(STATIC_LIB) $(MAINOBJ)
 	$(CC) $(CFLAGS) -o $@ $(MAINOBJ) -L$(LIBDIR) -l$(LIBNAME)
 	@echo "Built $@ (static)"
 
-# create the archive from the utility objects (main.o is NOT part of a library)
 $(STATIC_LIB): $(LIBOBJS)
 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)
 	ranlib $@
+
+# ---------- dynamic ----------
+# -shared turns position independent objects into a shared object
+$(SHARED_LIB): $(PICOBJS)
+	$(CC) -shared -o $@ $(PICOBJS)
+
+$(PICOBJS): | picobjects
 	@echo "Created $@"
+
+# NOTE: the linker prefers the .so when both exist, so we link the
+# dynamic client against the shared library explicitly.
+$(TARGET_D): $(SHARED_LIB) $(MAINOBJ)
+	$(CC) $(CFLAGS) -o $@ $(MAINOBJ) -L$(LIBDIR) -l$(LIBNAME)
+	@echo "Built $@ (dynamic)  -> run 'make runshared'"
 
 $(LIBOBJS) $(MAINOBJ): | objects
 
 objects:
 	$(MAKE) -C $(SRCDIR) all
 
-run: $(TARGET)
-	./$(TARGET)
+picobjects:
+	$(MAKE) -C $(SRCDIR) pic
 
-# quick analysis targets (useful for REPORT.md)
-analyze: $(TARGET)
-	@echo "--- contents of the archive ---"
-	$(AR) -t $(STATIC_LIB)
-	@echo "--- is mystrlen inside the executable? ---"
-	nm $(TARGET) | grep mystrlen
-	@echo "--- size ---"
-	ls -lh $(TARGET)
+# run the dynamic client after telling the loader where our .so lives
+runshared: $(TARGET_D)
+	LD_LIBRARY_PATH=$(CURDIR)/$(LIBDIR) ./$(TARGET_D)
+
+compare: all
+	@echo "--- size difference ---"
+	ls -lh $(BINDIR)/
+	@echo "--- shared library dependencies ---"
+	LD_LIBRARY_PATH=$(CURDIR)/$(LIBDIR) ldd $(TARGET_D)
 
 clean:
 	$(MAKE) -C $(SRCDIR) clean
-	rm -f $(BINDIR)/client_static $(STATIC_LIB)
+	rm -f $(BINDIR)/client $(BINDIR)/client_static $(BINDIR)/client_dynamic
+	rm -f $(STATIC_LIB) $(SHARED_LIB)
 	@echo "Cleaned"
 
-.PHONY: all objects run analyze clean
+.PHONY: all objects picobjects runshared compare clean
