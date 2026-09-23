@@ -1,0 +1,4 @@
+Operating Systems is fun
+Arif Butt teaches OS
+Linux is an operating system
+Static and dynamic libraries

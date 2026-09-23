@@ -1,0 +1,27 @@
+.TH WORDCOUNT 3 "September 2026" "libmyutils 0.4.1" "libmyutils Library Functions"
+.SH NAME
+wordCount \- count lines, words and characters in a file stream
+.SH SYNOPSIS
+.B #include "myfilefunctions.h"
+.PP
+.BI "int wordCount(FILE *" file ", int *" lines ", int *" words ", int *" chars );
+.SH DESCRIPTION
+The
+.B wordCount()
+function reads the stream
+.I file
+character by character until end of file and stores the number of
+newlines, words and characters in the integers pointed to by
+.IR lines ,
+.I words
+and
+.IR chars .
+A word is any sequence of characters separated by white space.
+.SH RETURN VALUE
+Returns 0 on success and \-1 on failure, for example when any of the
+pointers is NULL.
+.SH SEE ALSO
+.BR mygrep (3),
+.BR wc (1)
+.SH AUTHOR
+Your Name <your.email@example.com>

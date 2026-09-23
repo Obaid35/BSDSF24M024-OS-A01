@@ -1,0 +1,28 @@
+.TH MYGREP 3 "September 2026" "libmyutils 0.4.1" "libmyutils Library Functions"
+.SH NAME
+mygrep \- search a file for lines containing a string
+.SH SYNOPSIS
+.B #include "myfilefunctions.h"
+.PP
+.BI "int mygrep(FILE *" fp ", const char *" search_str ", char ***" matches );
+.SH DESCRIPTION
+The
+.B mygrep()
+function reads the stream
+.I fp
+line by line and keeps a copy of every line that contains
+.IR search_str .
+The array of matching lines is allocated inside the function and its
+address is stored in
+.IR matches ,
+which is why a triple pointer is required.
+.SH RETURN VALUE
+Returns the number of matching lines, or \-1 on failure.
+.SH NOTES
+The caller owns the returned memory and must release it with
+.BR freeMatches (3).
+.SH SEE ALSO
+.BR wordCount (3),
+.BR grep (1)
+.SH AUTHOR
+Your Name <your.email@example.com>

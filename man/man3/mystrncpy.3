@@ -1,0 +1,35 @@
+.TH MYSTRNCPY 3 "September 2026" "libmyutils 0.4.1" "libmyutils Library Functions"
+.SH NAME
+mystrncpy \- copy at most n characters of a string
+.SH SYNOPSIS
+.B #include "mystrfunctions.h"
+.PP
+.BI "int mystrncpy(char *" dest ", const char *" src ", int " n );
+.SH DESCRIPTION
+The
+.B mystrncpy()
+function copies at most
+.I n
+characters from the string
+.I src
+to
+.IR dest .
+If
+.I src
+is shorter than
+.I n
+characters, the remainder of
+.I dest
+is padded with null bytes.
+.SH RETURN VALUE
+Returns the number of characters actually copied from
+.IR src ,
+or \-1 on failure.
+.SH NOTES
+If
+.I src
+is longer than
+.IR n ,
+no terminating null byte is placed by this function.
+.SH AUTHOR
+Your Name <your.email@example.com>
