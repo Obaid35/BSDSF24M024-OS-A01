@@ -1,6 +1,6 @@
 # PA-01 — Report
 
-**Name:** Obaid ur Rehman
+**Name:** Muhammad Obaid ur Rehman
 **Roll Number:** BSDSF24M024
 **Repository:** https://github.com/Obaid35/BSDSF24M024-OS-A01
 
